@@ -284,7 +284,7 @@ void MainWindow::setCurrentGame(ChessGame* game)
 		// all pending events from the previous game before switching
 		// to the next one.
 		tmp->lockThread();
-		CuteChessApplication::processEvents();
+        QApplication::processEvents();
 		tmp->unlockThread();
 
 		// If the call to CuteChessApplication::processEvents() caused

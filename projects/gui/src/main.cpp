@@ -32,9 +32,10 @@ int main(int argc, char* argv[])
 	qRegisterMetaType<Chess::Move>("Chess::Move");
 	qRegisterMetaType<Chess::Side>("Chess::Side");
 
-	CuteChessApplication app(argc, argv);
+    QApplication guiApp(argc,argv);
+    CuteChessApplication app;
 
-	QStringList arguments = app.arguments();
+    QStringList arguments = guiApp.arguments();
 	arguments.takeFirst(); // application name
 
 	// Use trivial command-line parsing for now
@@ -61,5 +62,5 @@ int main(int argc, char* argv[])
 		arguments.takeFirst();
 	}
 	app.newDefaultGame();
-	return app.exec();
+    return guiApp.exec();
 }

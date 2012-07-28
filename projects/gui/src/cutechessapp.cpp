@@ -37,28 +37,32 @@
 #include "pgnimporter.h"
 #include "gamewall.h"
 
+CuteChessApplication* CuteChessApplication::m_instance = 0;
 
-CuteChessApplication::CuteChessApplication(int& argc, char* argv[])
-	: QApplication(argc, argv),
-	  m_engineManager(0),
+CuteChessApplication::CuteChessApplication(bool global):
+      m_engineManager(0),
 	  m_gameManager(0),
 	  m_gameDatabaseManager(0),
-	  m_gameDatabaseDialog(0)
+      m_gameDatabaseDialog(0)
 {
+    m_instance = this;
+
 	qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
 
-	// Set the application icon
-	QIcon icon;
-	icon.addFile(":/icons/cutechess_512x512.png");
-	icon.addFile(":/icons/cutechess_256x256.png");
-	icon.addFile(":/icons/cutechess_128x128.png");
-	icon.addFile(":/icons/cutechess_64x64.png");
-	icon.addFile(":/icons/cutechess_32x32.png");
-	icon.addFile(":/icons/cutechess_24x24.png");
-	icon.addFile(":/icons/cutechess_16x16.png");
-	setWindowIcon(icon);
+    if (global) {
+        // Set the application icon
+        QIcon icon;
+        icon.addFile(":/icons/cutechess_512x512.png");
+        icon.addFile(":/icons/cutechess_256x256.png");
+        icon.addFile(":/icons/cutechess_128x128.png");
+        icon.addFile(":/icons/cutechess_64x64.png");
+        icon.addFile(":/icons/cutechess_32x32.png");
+        icon.addFile(":/icons/cutechess_24x24.png");
+        icon.addFile(":/icons/cutechess_16x16.png");
+        qApp->setWindowIcon(icon);
 
-	setQuitOnLastWindowClosed(false);
+        qApp->setQuitOnLastWindowClosed(false);
+    }
 
 	QCoreApplication::setOrganizationName("cutechess");
 	QCoreApplication::setOrganizationDomain("cutechess.org");
@@ -73,8 +77,10 @@ CuteChessApplication::CuteChessApplication(int& argc, char* argv[])
 	// Read the game database state
 	gameDatabaseManager()->readState(configPath() + QLatin1String("/gamedb.bin"));
 
-	connect(this, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
-	connect(this, SIGNAL(aboutToQuit()), this, SLOT(onAboutToQuit()));
+    if (global) {
+        connect(qApp, SIGNAL(lastWindowClosed()), this, SLOT(onLastWindowClosed()));
+        connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(onAboutToQuit()));
+    }
 }
 
 CuteChessApplication::~CuteChessApplication()
@@ -84,7 +90,7 @@ CuteChessApplication::~CuteChessApplication()
 
 CuteChessApplication* CuteChessApplication::instance()
 {
-	return static_cast<CuteChessApplication*>(QApplication::instance());
+    return m_instance;
 }
 
 QString CuteChessApplication::userName()
@@ -204,11 +210,11 @@ void CuteChessApplication::onLastWindowClosed()
 {
 	if (m_gameManager != 0)
 	{
-		connect(m_gameManager, SIGNAL(finished()), this, SLOT(quit()));
+        connect(m_gameManager, SIGNAL(finished()), qApp, SLOT(quit()));
 		m_gameManager->finish();
 	}
 	else
-		quit();
+        qApp->quit();
 }
 
 void CuteChessApplication::onAboutToQuit()

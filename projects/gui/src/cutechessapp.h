@@ -29,12 +29,16 @@ class GameDatabaseDialog;
 class PgnImporter;
 class ChessGame;
 
-class CuteChessApplication : public QApplication
+class CuteChessApplication : public QObject
 {
 	Q_OBJECT
 
 	public:
-		CuteChessApplication(int& argc, char* argv[]);
+        /**
+          * Is the chess board the only application running? If not so, set global to false
+          * and call the aboutToQuit() and onLastWindowClosed() slots appropriately
+          */
+        CuteChessApplication(bool global = true);
 		virtual ~CuteChessApplication();
 
 		QString configPath();
@@ -62,6 +66,8 @@ class CuteChessApplication : public QApplication
 		GameDatabaseManager* m_gameDatabaseManager;
 		QList<QPointer<MainWindow> > m_gameWindows;
 		GameDatabaseDialog* m_gameDatabaseDialog;
+
+        static CuteChessApplication* m_instance;
 
 	private slots:
 		void onLastWindowClosed();
